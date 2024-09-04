@@ -4,11 +4,12 @@ import './App.css';
 
 function App() {
     const [code, setCode] = useState('');
+    const [language, setLanguage] = useState('python');
     const [result, setResult] = useState(null);
 
     const handleCalculate = async () => {
         try {
-            const response = await axios.post('http://localhost:5000/calculate', { code });
+            const response = await axios.post('http://localhost:5000/calculate', { code, language });
             setResult(response.data);
         } catch (error) {
             console.error('Error calculating metrics:', error);
@@ -18,6 +19,15 @@ function App() {
     return (
         <div className="App">
             <h1>Halstead Metrics Calculator</h1>
+            <div>
+                <label>
+                    Select Language: 
+                    <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+                        <option value="python">Python</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                </label>
+            </div>
             <textarea
                 rows="10"
                 cols="50"

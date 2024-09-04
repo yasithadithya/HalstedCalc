@@ -6,12 +6,23 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-function calculateHalsteadMetrics(code) {
-    // Refined regex pattern to identify Python operators, including bracket pairs
-    const operatorPattern = /\b(and|or|not|is|in)\b|==|!=|<=|>=|[+\-*/%=<>!&|~^:]+|\*\*|\/\/|<<|>>|\(\)|\[\]|\{\}|[+\-*/%=<>!&|~^:]+|[(){}\[\],]/g;
+function calculateHalsteadMetrics(code, language) {
+    let operatorPattern, operandPattern, keywords;
 
-    // Refined regex pattern to identify Python variables, constants, and function names as operands
-    const operandPattern = /\b[a-zA-Z_]\w*\b|\b\d+\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
+    // Define patterns based on language
+    if (language === 'python') {
+        // Python-specific patterns
+        operatorPattern = /\b(and|or|not|is|in)\b|==|!=|<=|>=|[+\-*/%=<>!&|~^:]+|\*\*|\/\/|<<|>>|\(\)|\[\]|\{\}|[+\-*/%=<>!&|~^:]+|[(){}\[\],]/g;
+        operandPattern = /\b[a-zA-Z_]\w*\b|\b\d+\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
+        keywords = ['and', 'or', 'not', 'is', 'in', 'if', 'for', 'def', 'return', 'print', 'range', 'True', 'False', 'None'];
+    } else if (language === 'cpp') {
+        // C++-specific patterns
+        operatorPattern = /==|!=|<=|>=|\+\+|--|\->|\+\=|\-\=|\*\=|\/\=|<<|>>|&&|\|\||[+\-*/%=<>!&|~^:]+|[(){}\[\],;]/g;
+        operandPattern = /\b[a-zA-Z_]\w*\b|\b\d+\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
+        keywords = ['auto', 'include', 'bool', 'break', 'case', 'catch', 'char', 'class', 'const', 'continue', 'default', 'delete', 'do', 'double', 'else', 'enum', 'explicit', 'export', 'extern', 'false', 'float', 'for', 'friend', 'goto', 'if', 'inline', 'int', 'long', 'mutable', 'namespace', 'new', 'operator', 'private', 'protected', 'public', 'register', 'return', 'short', 'signed', 'sizeof', 'static', 'struct', 'switch', 'template', 'this', 'throw', 'true', 'try', 'typedef', 'typeid', 'typename', 'union', 'unsigned', 'using', 'virtual', 'void', 'volatile', 'while', 'iostream', 'std', 'cout', 'main', 'endl'];
+    } else {
+        return { error: 'Unsupported language' };
+    }
 
     // Find operators and operands
     let operators = code.match(operatorPattern) || [];
@@ -20,20 +31,16 @@ function calculateHalsteadMetrics(code) {
     // Remove standalone open and close brackets after identifying pairs
     operators = operators.filter(op => !['(', ')', '[', ']', '{', '}'].includes(op));
 
-    // Python keywords to exclude from operands
-    const pythonKeywords = ['and', 'or', 'not', 'is', 'in', 'if', 'for', 'def', 'return', 'print', 'range', 'True', 'False', 'None'];
-
     // Filtering out keywords from operands
-    operands = operands.filter(operand => !pythonKeywords.includes(operand));
+    operands = operands.filter(operand => !keywords.includes(operand));
 
     // Filter out function calls but keep function declarations as operands
     operands = operands.filter((operand, index, allOperands) => {
         const functionPattern = new RegExp(`\\b${operand}\\s*\\(`);
 
-        // If it's not a function call, or if it appears in a function definition (e.g., `def function_name(...)`)
-        // or it's not immediately followed by '(', keep it.
+        // If it's not a function call, or if it appears in a function definition, keep it.
         const isFunctionCall = functionPattern.test(code);
-        const isFunctionDeclaration = new RegExp(`\\bdef\\s+${operand}\\s*\\(`).test(code);
+        const isFunctionDeclaration = new RegExp(`\\b(def|void|int|double|float|char|bool|class)\\s+${operand}\\s*\\(`).test(code);
         return !isFunctionCall || isFunctionDeclaration;
     });
 
@@ -81,11 +88,11 @@ function calculateHalsteadMetrics(code) {
 }
 
 app.post('/calculate', (req, res) => {
-    const { code } = req.body;
-    if (!code) {
-        return res.status(400).json({ error: 'Code is required.' });
+    const { code, language } = req.body;
+    if (!code || !language) {
+        return res.status(400).json({ error: 'Code and language are required.' });
     }
-    const result = calculateHalsteadMetrics(code);
+    const result = calculateHalsteadMetrics(code, language);
     res.json(result);
 });
 
