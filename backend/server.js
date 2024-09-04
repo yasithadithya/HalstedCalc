@@ -10,30 +10,36 @@ function calculateHalsteadMetrics(code) {
     // Refined regex pattern to identify Python operators, including bracket pairs
     const operatorPattern = /\b(and|or|not|is|in)\b|==|!=|<=|>=|[+\-*/%=<>!&|~^:]+|\*\*|\/\/|<<|>>|\(\)|\[\]|\{\}|[+\-*/%=<>!&|~^:]+|[(){}\[\],]/g;
 
-    // Refined regex pattern to identify Python operands (variables, literals, function names, etc.)
-    const operandPattern = /\b[a-zA-Z_]\w*\b|\b\d+\b|\bTrue\b|\bFalse\b|\bNone\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
+    // Refined regex pattern to identify Python variables and constants as operands
+    const operandPattern = /\b[a-zA-Z_]\w*\b|\b\d+\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
 
     // Find operators and operands
     let operators = code.match(operatorPattern) || [];
-    const operands = code.match(operandPattern) || [];
+    let operands = code.match(operandPattern) || [];
 
     // Remove standalone open and close brackets after identifying pairs
     operators = operators.filter(op => !['(', ')', '[', ']', '{', '}'].includes(op));
 
-    // Python keywords to exclude from operands
-    const pythonKeywords = ['and', 'or', 'not', 'is', 'in', 'if', 'for', 'def', 'return', 'print', 'range'];
+    // Python keywords and function names to exclude from operands
+    const pythonKeywords = ['and', 'or', 'not', 'is', 'in', 'if', 'for', 'def', 'return', 'print', 'range', 'True', 'False', 'None'];
 
-    // Remove keywords used as operands from the operands list
-    const filteredOperands = operands.filter(operand => !pythonKeywords.includes(operand));
+    // Filtering out keywords and function names from operands
+    operands = operands.filter(operand => !pythonKeywords.includes(operand));
+
+    // Further filter out operands that are function names by checking for their usage in code
+    operands = operands.filter(operand => {
+        const functionPattern = new RegExp(`\\b${operand}\\s*\\(`);
+        return !functionPattern.test(code);
+    });
 
     // Distinct operators and operands
     const distinctOperators = [...new Set(operators)];
-    const distinctOperands = [...new Set(filteredOperands)];
+    const distinctOperands = [...new Set(operands)];
 
     const n1 = distinctOperators.length; // Number of distinct operators
     const n2 = distinctOperands.length;  // Number of distinct operands
     const N1 = operators.length;         // Total number of operators
-    const N2 = filteredOperands.length;  // Total number of operands
+    const N2 = operands.length;          // Total number of operands
 
     // Calculate Halstead metrics
     const vocabulary = n1 + n2;
@@ -72,4 +78,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-//
