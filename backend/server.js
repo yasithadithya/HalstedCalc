@@ -10,7 +10,7 @@ function calculateHalsteadMetrics(code) {
     // Refined regex pattern to identify Python operators, including bracket pairs
     const operatorPattern = /\b(and|or|not|is|in)\b|==|!=|<=|>=|[+\-*/%=<>!&|~^:]+|\*\*|\/\/|<<|>>|\(\)|\[\]|\{\}|[+\-*/%=<>!&|~^:]+|[(){}\[\],]/g;
 
-    // Refined regex pattern to identify Python variables and constants as operands
+    // Refined regex pattern to identify Python variables, constants, and function names as operands
     const operandPattern = /\b[a-zA-Z_]\w*\b|\b\d+\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
 
     // Find operators and operands
@@ -20,16 +20,21 @@ function calculateHalsteadMetrics(code) {
     // Remove standalone open and close brackets after identifying pairs
     operators = operators.filter(op => !['(', ')', '[', ']', '{', '}'].includes(op));
 
-    // Python keywords and function names to exclude from operands
+    // Python keywords to exclude from operands
     const pythonKeywords = ['and', 'or', 'not', 'is', 'in', 'if', 'for', 'def', 'return', 'print', 'range', 'True', 'False', 'None'];
 
-    // Filtering out keywords and function names from operands
+    // Filtering out keywords from operands
     operands = operands.filter(operand => !pythonKeywords.includes(operand));
 
-    // Further filter out operands that are function names by checking for their usage in code
-    operands = operands.filter(operand => {
+    // Filter out function calls but keep function declarations as operands
+    operands = operands.filter((operand, index, allOperands) => {
         const functionPattern = new RegExp(`\\b${operand}\\s*\\(`);
-        return !functionPattern.test(code);
+
+        // If it's not a function call, or if it appears in a function definition (e.g., `def function_name(...)`)
+        // or it's not immediately followed by '(', keep it.
+        const isFunctionCall = functionPattern.test(code);
+        const isFunctionDeclaration = new RegExp(`\\bdef\\s+${operand}\\s*\\(`).test(code);
+        return !isFunctionCall || isFunctionDeclaration;
     });
 
     // Distinct operators and operands
