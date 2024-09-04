@@ -45,6 +45,7 @@ function calculateHalsteadMetrics(code) {
     const vocabulary = n1 + n2;
     const length = N1 + N2;
     const estimatedLength = n1 * Math.log2(n1) + n2 * Math.log2(n2);
+    const truthProgramLength = estimatedLength / length;
     const volume = length * Math.log2(vocabulary || 1);
     const difficulty = (n1 / 2) * (N2 / (n2 || 1));
     const effort = difficulty * volume;
@@ -55,6 +56,7 @@ function calculateHalsteadMetrics(code) {
         vocabulary,
         length,
         estimatedLength: estimatedLength.toFixed(2),
+        truthProgramLength: truthProgramLength.toFixed(2),
         volume: volume.toFixed(2),
         difficulty: difficulty.toFixed(2),
         effort: effort.toFixed(2),

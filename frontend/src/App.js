@@ -51,6 +51,10 @@ function App() {
                                 <td>{result.estimatedLength}</td>
                             </tr>
                             <tr>
+                                <td>True Length</td>
+                                <td>{result.truthProgramLength}</td>
+                            </tr>
+                            <tr>
                                 <td>Volume</td>
                                 <td>{result.volume}</td>
                             </tr>
@@ -78,8 +82,8 @@ function App() {
                         <thead>
                             <tr>
                                 <th>Operator</th>
-                                <th>Count</th>
-                                <th>Distinct Count</th>
+                                <th>N1</th>
+                                <th>n2</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -100,8 +104,8 @@ function App() {
                         <thead>
                             <tr>
                                 <th>Operand</th>
-                                <th>Count</th>
-                                <th>Distinct Count</th>
+                                <th>N2</th>
+                                <th>n2</th>
                             </tr>
                         </thead>
                         <tbody>
