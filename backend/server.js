@@ -60,8 +60,16 @@ function calculateHalsteadMetrics(code) {
         effort: effort.toFixed(2),
         time: time.toFixed(2),
         bugs: bugs.toFixed(2),
-        operators: distinctOperators,
-        operands: distinctOperands
+        operators: {
+            list: distinctOperators,
+            count: N1,
+            distinctCount: n1
+        },
+        operands: {
+            list: distinctOperands,
+            count: N2,
+            distinctCount: n2
+        }
     };
 }
 

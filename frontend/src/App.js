@@ -78,14 +78,20 @@ function App() {
                         <thead>
                             <tr>
                                 <th>Operator</th>
+                                <th>Count</th>
+                                <th>Distinct Count</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {result.operators.map((operator, index) => (
-                                <tr key={index}>
-                                    <td>{operator}</td>
-                                </tr>
-                            ))}
+                            <tr>
+                                <td>
+                                    {result.operators.list.map((operator, index) => (
+                                        <span key={index}>{operator}{index < result.operators.list.length - 1 ? ', ' : ''}</span>
+                                    ))}
+                                </td>
+                                <td>{result.operators.count}</td>
+                                <td>{result.operators.distinctCount}</td>
+                            </tr>
                         </tbody>
                     </table>
 
@@ -94,14 +100,20 @@ function App() {
                         <thead>
                             <tr>
                                 <th>Operand</th>
+                                <th>Count</th>
+                                <th>Distinct Count</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {result.operands.map((operand, index) => (
-                                <tr key={index}>
-                                    <td>{operand}</td>
-                                </tr>
-                            ))}
+                            <tr>
+                                <td>
+                                    {result.operands.list.map((operand, index) => (
+                                        <span key={index}>{operand}{index < result.operands.list.length - 1 ? ', ' : ''}</span>
+                                    ))}
+                                </td>
+                                <td>{result.operands.count}</td>
+                                <td>{result.operands.distinctCount}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </>
