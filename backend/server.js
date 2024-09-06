@@ -20,6 +20,11 @@ function calculateHalsteadMetrics(code, language) {
         operatorPattern = /==|!=|<=|>=|\+\+|--|\->|\+\=|\-\=|\*\=|\/\=|<<|>>|&&|\|\||[+\-*/%=<>!&|~^:]+|[(){}\[\],;]/g;
         operandPattern = /\b[a-zA-Z_]\w*\b|\b\d+\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
         keywords = ['auto', 'include', 'bool', 'break', 'case', 'catch', 'char', 'class', 'const', 'continue', 'default', 'delete', 'do', 'double', 'else', 'enum', 'explicit', 'export', 'extern', 'false', 'float', 'for', 'friend', 'goto', 'if', 'inline', 'int', 'long', 'mutable', 'namespace', 'new', 'operator', 'private', 'protected', 'public', 'register', 'return', 'short', 'signed', 'sizeof', 'static', 'struct', 'switch', 'template', 'this', 'throw', 'true', 'try', 'typedef', 'typeid', 'typename', 'union', 'unsigned', 'using', 'virtual', 'void', 'volatile', 'while', 'iostream', 'std', 'cout', 'main', 'endl'];
+    } else if (language === 'java') {
+        // Java-specific patterns
+        operatorPattern = /==|!=|<=|>=|\+\+|--|\+=|-=|\*=|\/=|<<|>>|&&|\|\||->|\binstanceof\b|[+\-*/%=<>!&|~^:]+|[(){}\[\],;]/g;
+        operandPattern = /\b[a-zA-Z_]\w*\b|\b\d+\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
+        keywords = ['abstract', 'assert', 'boolean', 'break', 'byte', 'case', 'catch', 'char', 'class', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extends', 'final', 'finally', 'float', 'for', 'goto', 'if', 'implements', 'import', 'instanceof', 'int', 'interface', 'long', 'native', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'short', 'static', 'strictfp', 'super', 'switch', 'synchronized', 'this', 'throw', 'throws', 'transient', 'true', 'try', 'void', 'volatile', 'while'];
     } else {
         return { error: 'Unsupported language' };
     }
@@ -40,7 +45,7 @@ function calculateHalsteadMetrics(code, language) {
 
         // If it's not a function call, or if it appears in a function definition, keep it.
         const isFunctionCall = functionPattern.test(code);
-        const isFunctionDeclaration = new RegExp(`\\b(def|void|int|double|float|char|bool|class)\\s+${operand}\\s*\\(`).test(code);
+        const isFunctionDeclaration = new RegExp(`\\b(def|void|int|double|float|char|bool|class|public|private|protected|static|final)\\s+${operand}\\s*\\(`).test(code);
         return !isFunctionCall || isFunctionDeclaration;
     });
 

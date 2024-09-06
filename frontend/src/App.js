@@ -25,6 +25,7 @@ function App() {
                     <select value={language} onChange={(e) => setLanguage(e.target.value)}>
                         <option value="python">Python</option>
                         <option value="cpp">C++</option>
+                        <option value="java">Java</option>
                     </select>
                 </label>
             </div>
