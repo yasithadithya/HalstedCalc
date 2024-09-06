@@ -22,9 +22,9 @@ function calculateHalsteadMetrics(code, language) {
         keywords = ['auto', 'include', 'bool', 'break', 'case', 'catch', 'char', 'class', 'const', 'continue', 'default', 'delete', 'do', 'double', 'else', 'enum', 'explicit', 'export', 'extern', 'false', 'float', 'for', 'friend', 'goto', 'if', 'inline', 'int', 'long', 'mutable', 'namespace', 'new', 'operator', 'private', 'protected', 'public', 'register', 'return', 'short', 'signed', 'sizeof', 'static', 'struct', 'switch', 'template', 'this', 'throw', 'true', 'try', 'typedef', 'typeid', 'typename', 'union', 'unsigned', 'using', 'virtual', 'void', 'volatile', 'while', 'iostream', 'std', 'cout', 'main', 'endl'];
     } else if (language === 'java') {
         // Java-specific patterns
-        operatorPattern = /==|!=|<=|>=|\+\+|--|\+=|-=|\*=|\/=|<<|>>|&&|\|\||->|\binstanceof\b|[+\-*/%=<>!&|~^:]+|[(){}\[\],;]/g;
+        operatorPattern = /==|!=|<=|>=|\+\+|--|\+=|-=|\*=|\/=|<<|>>|&&|\|\||->|\binstanceof\b|[+\-*/%=<>!&|~^]+|[(){}\[\],]/g;
         operandPattern = /\b[a-zA-Z_]\w*\b|\b\d+\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
-        keywords = ['abstract', 'assert', 'boolean', 'break', 'byte', 'case', 'catch', 'char', 'class', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extends', 'final', 'finally', 'float', 'for', 'goto', 'if', 'implements', 'import', 'instanceof', 'int', 'interface', 'long', 'native', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'short', 'static', 'strictfp', 'super', 'switch', 'synchronized', 'this', 'throw', 'throws', 'transient', 'true', 'try', 'void', 'volatile', 'while'];
+        keywords = ['abstract', 'assert', 'boolean', 'break', 'byte', 'case', 'catch', 'char', 'class', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extends', 'final', 'finally', 'float', 'for', 'goto', 'if', 'implements', 'import', 'instanceof', 'int', 'interface', 'long', 'native', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'short', 'static', 'strictfp', 'super', 'switch', 'synchronized', 'this', 'throw', 'throws', 'transient', 'try', 'void', 'volatile', 'while', 'main', 'String', 'args'];
     } else {
         return { error: 'Unsupported language' };
     }
@@ -38,6 +38,18 @@ function calculateHalsteadMetrics(code, language) {
 
     // Filtering out keywords from operands
     operands = operands.filter(operand => !keywords.includes(operand));
+
+    // Exclude class declarations in Java
+    operands = operands.filter(operand => {
+        const isClassDeclaration = new RegExp(`\\bclass\\s+${operand}`).test(code);
+        return !isClassDeclaration;
+    });
+
+    // Exclude System.out and its variations in Java
+    operands = operands.filter(operand => {
+        const isSystemOut = operand === 'System' || operand === 'out' || operand.startsWith('System.out');
+        return !isSystemOut;
+    });
 
     // Filter out function calls but keep function declarations as operands
     operands = operands.filter((operand, index, allOperands) => {
@@ -63,8 +75,8 @@ function calculateHalsteadMetrics(code, language) {
     const length = N1 + N2;
     const estimatedLength = n1 * Math.log2(n1) + n2 * Math.log2(n2);
     const truthProgramLength = estimatedLength / length;
-    const volume = length * Math.log2(vocabulary || 1);
-    const difficulty = (n1 / 2) * (N2 / (n2 || 1));
+    const volume = length * Math.log2(vocabulary);
+    const difficulty = (n1 / 2) * (N2 / n2);
     const effort = difficulty * volume;
     const time = effort / 18;  // Programming time in seconds
     const bugs = volume / 3000; // Number of delivered bugs
@@ -72,13 +84,13 @@ function calculateHalsteadMetrics(code, language) {
     return {
         vocabulary,
         length,
-        estimatedLength: estimatedLength.toFixed(2),
-        truthProgramLength: truthProgramLength.toFixed(2),
-        volume: volume.toFixed(2),
-        difficulty: difficulty.toFixed(2),
-        effort: effort.toFixed(2),
-        time: time.toFixed(2),
-        bugs: bugs.toFixed(2),
+        estimatedLength: estimatedLength.toFixed(3),
+        truthProgramLength: truthProgramLength.toFixed(3),
+        volume: volume.toFixed(3),
+        difficulty: difficulty.toFixed(3),
+        effort: effort.toFixed(3),
+        time: time.toFixed(3),
+        bugs: bugs.toFixed(3),
         operators: {
             list: distinctOperators,
             count: N1,
