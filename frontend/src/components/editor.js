@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextField, Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { TextField, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 // Code editor component
 export const CodeEditor = ({ code, setCode }) => (
@@ -17,29 +17,41 @@ export const CodeEditor = ({ code, setCode }) => (
     </Box>
 );
 
-// Result table for metrics
-export const ResultTable = ({ result }) => (
-    <TableContainer component={Paper} sx={{ marginTop: '20px', maxWidth: 600, margin: '20px auto' }}>
-        <Table>
-            <TableHead>
-                <TableRow>
-                    <TableCell><strong>Metric</strong></TableCell>
-                    <TableCell><strong>Value</strong></TableCell>
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {Object.keys(result).map((metric) => (
-                    typeof result[metric] === 'number' && (
-                        <TableRow key={metric}>
-                            <TableCell>{metric.charAt(0).toUpperCase() + metric.slice(1)}</TableCell>
-                            <TableCell>{result[metric]}</TableCell>
+// Result table for Halstead metrics
+export const ResultTable = ({ result }) => {
+    const metrics = [
+        { label: 'Vocabulary', key: 'vocabulary' },
+        { label: 'Length', key: 'length' },
+        { label: 'Estimated Length', key: 'estimatedLength' },
+        { label: 'True Length', key: 'truthProgramLength' },
+        { label: 'Volume', key: 'volume' },
+        { label: 'Difficulty', key: 'difficulty' },
+        { label: 'Effort', key: 'effort' },
+        { label: 'Time', key: 'time' },
+        { label: 'Bugs', key: 'bugs' }
+    ];
+
+    return (
+        <TableContainer component={Paper} sx={{ marginTop: '20px', maxWidth: 600, margin: '20px auto' }}>
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        <TableCell><strong>Metric</strong></TableCell>
+                        <TableCell><strong>Value</strong></TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {metrics.map((metric) => (
+                        <TableRow key={metric.key}>
+                            <TableCell>{metric.label}</TableCell>
+                            <TableCell>{result[metric.key] || 'N/A'}</TableCell>
                         </TableRow>
-                    )
-                ))}
-            </TableBody>
-        </Table>
-    </TableContainer>
-);
+                    ))}
+                </TableBody>
+            </Table>
+        </TableContainer>
+    );
+};
 
 // Operators table
 export const OperatorsTable = ({ operators }) => (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Container, Button, TextField, Select, MenuItem, InputLabel, FormControl, Typography, Box } from '@mui/material';
-import { CodeEditor, ResultTable, OperatorsTable, OperandsTable } from './components';
+import { Container, Button, Select, MenuItem, InputLabel, FormControl, Typography, Box } from '@mui/material';
+import { CodeEditor, ResultTable, OperatorsTable, OperandsTable } from './components/editor';
 
 function App() {
     const [code, setCode] = useState('');
@@ -11,6 +11,7 @@ function App() {
     const handleCalculate = async () => {
         try {
             const response = await axios.post('http://localhost:5000/calculate', { code, language });
+            console.log(response.data); // Check if all metrics are coming from backend
             setResult(response.data);
         } catch (error) {
             console.error('Error calculating metrics:', error);
@@ -47,15 +48,20 @@ function App() {
 
             {result && (
                 <>
-                    <ResultTable result={result} />
                     <Typography variant="h5" component="h2" gutterBottom>
                         Operators
                     </Typography>
                     <OperatorsTable operators={result.operators} />
+
                     <Typography variant="h5" component="h2" gutterBottom>
                         Operands
                     </Typography>
                     <OperandsTable operands={result.operands} />
+
+                    <Typography variant="h5" component="h2" gutterBottom>
+                        Halstead Metrics
+                    </Typography>
+                    <ResultTable result={result} />
                 </>
             )}
         </Container>
