@@ -1,27 +1,30 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+
+// Multer setup for handling file uploads
+const upload = multer({ dest: 'uploads/' });
 
 function calculateHalsteadMetrics(code, language) {
     let operatorPattern, operandPattern, keywords;
 
     // Define patterns based on language
     if (language === 'python') {
-        // Python-specific patterns
         operatorPattern = /\b(and|or|not|is|in)\b|==|!=|<=|>=|[+\-*/%=<>!&|~^:]+|\*\*|\/\/|<<|>>|\(\)|\[\]|\{\}|[+\-*/%=<>!&|~^:]+|[(){}\[\],]/g;
         operandPattern = /\b[a-zA-Z_]\w*\b|\b\d+\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
         keywords = ['and', 'or', 'not', 'is', 'in', 'if', 'for', 'def', 'return', 'print', 'range', 'True', 'False', 'None'];
     } else if (language === 'cpp') {
-        // C++-specific patterns
         operatorPattern = /==|!=|<=|>=|\+\+|--|\->|\+\=|\-\=|\*\=|\/\=|<<|>>|&&|\|\||[+\-*/%=<>!&|~^:]+|[(){}\[\],;]/g;
         operandPattern = /\b[a-zA-Z_]\w*\b|\b\d+\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
         keywords = ['auto', 'include', 'bool', 'break', 'case', 'catch', 'char', 'class', 'const', 'continue', 'default', 'delete', 'do', 'double', 'else', 'enum', 'explicit', 'export', 'extern', 'false', 'float', 'for', 'friend', 'goto', 'if', 'inline', 'int', 'long', 'mutable', 'namespace', 'new', 'operator', 'private', 'protected', 'public', 'register', 'return', 'short', 'signed', 'sizeof', 'static', 'struct', 'switch', 'template', 'this', 'throw', 'true', 'try', 'typedef', 'typeid', 'typename', 'union', 'unsigned', 'using', 'virtual', 'void', 'volatile', 'while', 'iostream', 'std', 'cout', 'main', 'endl'];
     } else if (language === 'java') {
-        // Java-specific patterns
         operatorPattern = /==|!=|<=|>=|\+\+|--|\+=|-=|\*=|\/=|<<|>>|&&|\|\||->|\binstanceof\b|[+\-*/%=<>!&|~^]+|[(){}\[\],]/g;
         operandPattern = /\b[a-zA-Z_]\w*\b|\b\d+\b|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
         keywords = ['abstract', 'assert', 'boolean', 'break', 'byte', 'case', 'catch', 'char', 'class', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extends', 'final', 'finally', 'float', 'for', 'goto', 'if', 'implements', 'import', 'instanceof', 'int', 'interface', 'long', 'native', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'short', 'static', 'strictfp', 'super', 'switch', 'synchronized', 'this', 'throw', 'throws', 'transient', 'try', 'void', 'volatile', 'while', 'main', 'String', 'args'];
@@ -39,23 +42,16 @@ function calculateHalsteadMetrics(code, language) {
     // Filtering out keywords from operands
     operands = operands.filter(operand => !keywords.includes(operand));
 
-    // Exclude class declarations in Java
+    // Exclude class declarations and System.out in Java
     operands = operands.filter(operand => {
         const isClassDeclaration = new RegExp(`\\bclass\\s+${operand}`).test(code);
-        return !isClassDeclaration;
-    });
-
-    // Exclude System.out and its variations in Java
-    operands = operands.filter(operand => {
         const isSystemOut = operand === 'System' || operand === 'out' || operand.startsWith('System.out');
-        return !isSystemOut;
+        return !isClassDeclaration && !isSystemOut;
     });
 
     // Filter out function calls but keep function declarations as operands
-    operands = operands.filter((operand, index, allOperands) => {
+    operands = operands.filter((operand) => {
         const functionPattern = new RegExp(`\\b${operand}\\s*\\(`);
-
-        // If it's not a function call, or if it appears in a function definition, keep it.
         const isFunctionCall = functionPattern.test(code);
         const isFunctionDeclaration = new RegExp(`\\b(def|void|int|double|float|char|bool|class|public|private|protected|static|final)\\s+${operand}\\s*\\(`).test(code);
         return !isFunctionCall || isFunctionDeclaration;
@@ -65,10 +61,10 @@ function calculateHalsteadMetrics(code, language) {
     const distinctOperators = [...new Set(operators)];
     const distinctOperands = [...new Set(operands)];
 
-    const n1 = distinctOperators.length; // Number of distinct operators
-    const n2 = distinctOperands.length;  // Number of distinct operands
-    const N1 = operators.length;         // Total number of operators
-    const N2 = operands.length;          // Total number of operands
+    const n1 = distinctOperators.length;
+    const n2 = distinctOperands.length;
+    const N1 = operators.length;
+    const N2 = operands.length;
 
     // Calculate Halstead metrics
     const vocabulary = n1 + n2;
@@ -78,8 +74,8 @@ function calculateHalsteadMetrics(code, language) {
     const volume = length * Math.log2(vocabulary);
     const difficulty = (n1 / 2) * (N2 / n2);
     const effort = difficulty * volume;
-    const time = effort / 18;  // Programming time in seconds
-    const bugs = volume / 3000; // Number of delivered bugs
+    const time = effort / 18;
+    const bugs = volume / 3000;
 
     return {
         vocabulary,
@@ -103,6 +99,25 @@ function calculateHalsteadMetrics(code, language) {
         }
     };
 }
+
+// Route to handle file upload and return code content
+app.post('/upload', upload.single('file'), (req, res) => {
+    const filePath = path.join(__dirname, req.file.path);
+
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to read file' });
+        }
+
+        // Respond with the file content (the code)
+        res.json({ code: data });
+
+        // Optionally, delete the file after reading
+        fs.unlink(filePath, (err) => {
+            if (err) console.error('Failed to delete the file:', err);
+        });
+    });
+});
 
 app.post('/calculate', (req, res) => {
     const { code, language } = req.body;

@@ -7,14 +7,33 @@ function App() {
     const [code, setCode] = useState('');
     const [language, setLanguage] = useState('python');
     const [result, setResult] = useState(null);
+    const [file, setFile] = useState(null);
 
     const handleCalculate = async () => {
         try {
             const response = await axios.post('http://localhost:5000/calculate', { code, language });
-            console.log(response.data); // Check if all metrics are coming from backend
             setResult(response.data);
         } catch (error) {
             console.error('Error calculating metrics:', error);
+        }
+    };
+
+    const handleFileUpload = async (event) => {
+        const selectedFile = event.target.files[0];
+        setFile(selectedFile);
+
+        // Upload the file and extract code
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+            const response = await axios.post('http://localhost:5000/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            setCode(response.data.code);  // Set the extracted code to the editor
+        } catch (error) {
+            console.error('Error uploading file:', error);
         }
     };
 
@@ -34,6 +53,13 @@ function App() {
                     </Select>
                 </FormControl>
             </Box>
+
+            <input
+                type="file"
+                accept=".py,.cpp,.java,.txt"
+                onChange={handleFileUpload}
+                style={{ marginBottom: '20px' }}
+            />
 
             <CodeEditor code={code} setCode={setCode} />
 
