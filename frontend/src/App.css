@@ -1,44 +1,213 @@
-body {
-  background-color: #f5f5f5;
-  font-family: 'Roboto', sans-serif;
-  margin: 0;
-  padding: 0;
-  color: #333;
+:root {
+  --ink: #102129;
+  --ink-muted: #4c6770;
+  --surface-1: rgba(255, 255, 255, 0.88);
+  --surface-2: #f7fbfc;
+  --surface-stroke: rgba(16, 33, 41, 0.1);
+  --accent: #006a76;
+  --accent-soft: #d1eff2;
+  --accent-2: #c75a1b;
 }
 
-textarea {
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  padding: 10px;
+.app-shell {
+  min-height: 100vh;
+  position: relative;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(0, 106, 118, 0.2), transparent 36%),
+    radial-gradient(circle at 88% 18%, rgba(199, 90, 27, 0.2), transparent 40%),
+    linear-gradient(155deg, #f5f6ef 0%, #dcebf0 45%, #f8f2e6 100%);
+  overflow: hidden;
+}
+
+.app-shell::before,
+.app-shell::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(12px);
+  z-index: 0;
+}
+
+.app-shell::before {
+  width: 280px;
+  height: 280px;
+  right: -80px;
+  top: 10%;
+  background: rgba(0, 106, 118, 0.16);
+}
+
+.app-shell::after {
+  width: 320px;
+  height: 320px;
+  left: -140px;
+  bottom: -80px;
+  background: rgba(199, 90, 27, 0.14);
+}
+
+.app-shell .MuiContainer-root {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-panel {
+  padding: clamp(1.4rem, 3vw, 2.2rem);
+  border: 1px solid var(--surface-stroke);
+  border-radius: 20px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.92), rgba(237, 248, 249, 0.82));
+  box-shadow: 0 20px 50px rgba(7, 37, 46, 0.15);
+  animation: rise-in 560ms ease-out;
+}
+
+.eyebrow {
+  display: inline-block;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+}
+
+.hero-title {
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.1;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  margin-bottom: 0.5rem;
+}
+
+.hero-copy {
+  color: var(--ink-muted);
+  max-width: 66ch;
+  font-size: clamp(0.95rem, 1.6vw, 1.08rem);
+}
+
+.workspace-panel {
+  margin-top: 1.35rem;
+  border: 1px solid var(--surface-stroke);
+  border-radius: 20px;
+  padding: clamp(1rem, 2.5vw, 1.7rem);
+  background: var(--surface-1);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 14px 32px rgba(10, 44, 56, 0.12);
+  animation: rise-in 680ms ease-out;
+}
+
+.upload-button {
+  border-color: rgba(0, 106, 118, 0.4) !important;
+  color: var(--accent) !important;
+}
+
+.file-chip {
+  max-width: 260px;
+}
+
+.file-chip .MuiChip-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calculate-button {
+  background: linear-gradient(125deg, var(--accent), #008190) !important;
+  color: #f5ffff !important;
+  padding-inline: 2.25rem !important;
+  border-radius: 999px !important;
+  text-transform: none !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 16px 28px rgba(0, 106, 118, 0.28) !important;
+}
+
+.calculate-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 30px rgba(0, 106, 118, 0.35) !important;
+}
+
+.results-title {
+  color: var(--ink);
+  margin-bottom: 1rem !important;
+  font-size: clamp(1.5rem, 3vw, 2rem) !important;
+  font-weight: 700 !important;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.85rem;
+}
+
+.metric-card {
+  border: 1px solid var(--surface-stroke);
+  border-radius: 16px;
+  padding: 0.95rem 1rem;
+  background: linear-gradient(170deg, rgba(255, 255, 255, 0.92), rgba(233, 244, 246, 0.76));
+  min-height: 105px;
+}
+
+.metric-label {
+  color: var(--ink-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.metric-value {
+  color: var(--ink);
+  font-weight: 700 !important;
+  margin-top: 0.45rem !important;
+}
+
+.section-title {
+  color: var(--ink);
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.6rem !important;
+  font-weight: 700 !important;
+}
+
+.result-table-shell {
+  border: 1px solid var(--surface-stroke);
+  border-radius: 14px !important;
+  overflow: hidden;
+  margin: 0 auto;
   width: 100%;
-  max-width: 600px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  background: rgba(255, 255, 255, 0.84) !important;
 }
 
-button {
-  background-color: #1976d2;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
+.table-head-cell {
+  font-weight: 700 !important;
+  color: #083640 !important;
+  background: linear-gradient(180deg, #dff0f2, #eff8f9) !important;
 }
 
-button:hover {
-  background-color: #1565c0;
+.table-label-cell {
+  color: #1f363e !important;
+  font-weight: 500 !important;
 }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 20px 0;
+.table-value-cell {
+  color: #0d2730 !important;
+  font-weight: 600 !important;
 }
 
-table, th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-th {
-  background-color: #f2f2f2;
+@media (max-width: 768px) {
+  .hero-panel,
+  .workspace-panel {
+    border-radius: 16px;
+  }
+
+  .hero-title {
+    margin-bottom: 0.6rem;
+  }
+
+  .calculate-button {
+    width: 100%;
+  }
 }
